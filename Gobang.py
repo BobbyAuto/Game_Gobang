@@ -271,38 +271,38 @@ class Gobang:
             return True
         return False
 
-    def evaluate(self, board, color):
+    def evaluate(self, board, gamePlayer):
         """
         evaluate the situation, and return the evaluated score.
         :param board:
-        :param color:
+        :param gamePlayer:
         :return:
         """
         score = 0
         # horizontal
         for x in range(self.size):
             for y in range(self.size - 5):
-                score += self.getScore(color, (board[(x, y)], board[(x, y + 1)],
-                                               board[(x, y + 2)], board[(x, y + 3)], board[(x, y + 4)],
-                                               board[(x, y + 5)]))
+                score += self.getScore(gamePlayer, (board[(x, y)], board[(x, y + 1)],
+                                                    board[(x, y + 2)], board[(x, y + 3)], board[(x, y + 4)],
+                                                    board[(x, y + 5)]))
         # vertical
         for x in range(self.size - 5):
             for y in range(self.size):
-                score += self.getScore(color, (board[(x, y)], board[(x + 1, y)],
-                                               board[(x + 2, y)], board[(x + 3, y)], board[(x + 4, y)],
-                                               board[(x + 5, y)]))
+                score += self.getScore(gamePlayer, (board[(x, y)], board[(x + 1, y)],
+                                                    board[(x + 2, y)], board[(x + 3, y)], board[(x + 4, y)],
+                                                    board[(x + 5, y)]))
         # diagonal line, from top left to bottom right
         for x in range(self.size - 5):
             for y in range(self.size - 5):
-                score += self.getScore(color, (board[(x, y)], board[(x + 1, y + 1)],
-                                               board[(x + 2, y + 2)], board[(x + 3, y + 3)], board[(x + 4, y + 4)],
-                                               board[(x + 5, y + 5)]))
+                score += self.getScore(gamePlayer, (board[(x, y)], board[(x + 1, y + 1)],
+                                                    board[(x + 2, y + 2)], board[(x + 3, y + 3)], board[(x + 4, y + 4)],
+                                                    board[(x + 5, y + 5)]))
         # diagonal line, from top right to bottom left
         for x in range(self.size - 5):
             for y in range(self.size - 5):
-                score += self.getScore(color, (board[(x + 5, y)], board[(x + 4, y + 1)],
-                                               board[(x + 3, y + 2)], board[(x + 2, y + 3)], board[(x + 1, y + 4)],
-                                               board[(x, y + 5)]))
+                score += self.getScore(gamePlayer, (board[(x + 5, y)], board[(x + 4, y + 1)],
+                                                    board[(x + 3, y + 2)], board[(x + 2, y + 3)], board[(x + 1, y + 4)],
+                                                    board[(x, y + 5)]))
         return score
 
     def getScore(self, color, chess):
@@ -318,7 +318,7 @@ class Gobang:
                 chess == (255 - color, color, color, color, color, color) or chess == (
                 -1, color, color, color, color, color) or \
                 chess == (color, color, color, color, color, -1):
-            return 10000
+            return 1000
 
         # second priority, to prevent the opponent from winning in the next step
         if chess == (255 - color, 255 - color, 255 - color, 255 - color, color, 255 - color) or chess == (
@@ -334,36 +334,38 @@ class Gobang:
                 color, 255 - color, 255 - color, 255 - color, color, 255 - color) or \
                 chess == (-1, 255 - color, color, 255 - color, 255 - color, 255 - color) or chess == (
                 255 - color, 255 - color, 255 - color, color, 255 - color, -1):
-            return 8000
+            return 80
 
         # third priority, create a must winning strategy
         if chess == (-1, color, color, color, color, -1):
-            return 8000
+            return 70
 
         # fifth priority, disrupt the opponent's must winning strategy
         if chess == (-1, color, color - 255, color - 255, color - 255, -1) or chess == (
                 -1, color - 255, color - 255, color - 255, color, -1) \
                 or chess == (-1, color - 255, color - 255, color, color - 255, -1) or chess == (
                 -1, color - 255, color, color - 255, color - 255, -1):
-            return 4000
+            return 40
         if chess == (-1, color - 255, color - 255, -1, color - 255, color) or chess == (
                 color, color - 255, -1, color - 255, color - 255, -1) or \
                 chess == (-1, color - 255, -1, color - 255, color - 255, color) or chess == (
                 color, color - 255, color - 255, -1, color - 255, -1):
-            return 2000
+            # return 2000
+            return 40
+
         # sixth priority, create favorable chess
         if chess == (-1, color, color, color, -1, -1) or chess == (-1, -1, color, color, color, -1) or \
                 chess == (-1, color, color, -1, color, -1) or chess == (-1, color, -1, color, color, -1):
-            return 1000
+            return 20
         if chess == (-1, color, color, -1, -1, -1) or chess == (-1, -1, -1, color, color, -1) or \
                 chess == (-1, -1, color, color, -1, -1) or \
                 chess == (-1, color, -1, color, -1, -1) or chess == (-1, -1, color, -1, color, -1):
-            return 20
+            return 10
         if chess == (-1, 255 - color, color, -1, -1, -1):
             if color == self.AI:
-                return 10
+                return 2
             else:
-                return 10
+                return 2
         return 0
 
     def checkWinner(self, ):
