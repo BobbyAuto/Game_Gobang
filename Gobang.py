@@ -1,5 +1,6 @@
 import pygame
-
+from pygame.locals import *
+import pyautogui
 
 class Gobang:
     def __init__(self, size, depth):
@@ -97,6 +98,7 @@ class Gobang:
 
                 if event.type == pygame.KEYDOWN:
                     key = pygame.key.get_pressed()
+
                     if key[pygame.K_SPACE]:
                         print("K_Space!")
                         self.renderBoard()
@@ -148,6 +150,7 @@ class Gobang:
 
         # draw a reminder dot on the last chess piece which was placed by AI
         if lastPiece is not None:
+            print(lastPiece)
             xi = self.padding + lastPiece[0] * self.crossSpace
             yi = self.padding + lastPiece[1] * self.crossSpace
             pygame.draw.circle(self.screen, (255, 0, 0), (xi, yi), 5, 0)
@@ -205,7 +208,11 @@ class Gobang:
         board_temp = board.copy()
 
         if dep == 0:
-            score = self.evaluate(board_temp, self.AI) - self.evaluate(board_temp, self.player)
+            score_AIColor = self.evaluate(board_temp, self.AI)
+            score_playerColor = self.evaluate(board_temp, self.player)
+            # print("maxValue: score_AIColor = " + str(score_AIColor) + ", score_playerColor = " + str(score_playerColor))
+
+            score = score_AIColor - score_playerColor
             return score, score, (-1, -1)
 
         alpha = float('-inf')
@@ -213,8 +220,8 @@ class Gobang:
 
         for x in range(self.size):
             for y in range(self.size):
-                if self.skipCross(x, y):
-                    continue
+                # if self.skipCross(x, y):
+                #     continue
                 if board_temp[(x, y)] == -1:
                     board_temp[(x, y)] = color
                     next_alpha, next_beta, _ = self.minValue(board_temp, dep - 1, self.player, alpha, beta)
@@ -240,7 +247,12 @@ class Gobang:
         board_temp = board.copy()
 
         if dep == 0:
-            score = self.evaluate(board_temp, self.AI) - self.evaluate(board_temp, self.player)
+            # score = self.evaluate(board_temp, self.AI) - self.evaluate(board_temp, self.player)
+            score_AIColor = self.evaluate(board_temp, self.AI)
+            score_playerColor = self.evaluate(board_temp, self.player)
+            # print("maxValue: score_AIColor = " + str(score_AIColor) + ", score_playerColor = " + str(score_playerColor))
+
+            score = score_AIColor - score_playerColor
             return score, score, (-1, -1)
 
         alpha = last_alpha
@@ -248,14 +260,14 @@ class Gobang:
 
         for x in range(self.size):
             for y in range(self.size):
-                if self.skipCross(x, y):
-                    continue
+                # if self.skipCross(x, y):
+                #     continue
                 if board_temp[(x, y)] == -1:
                     board_temp[(x, y)] = color
                     next_alpha, next_beta, _ = self.maxValue(board_temp, dep - 1, self.AI, alpha, beta)
                     board_temp[(x, y)] = -1
 
-                    if color == self.player and beta > next_alpha:
+                    if beta > next_alpha:
                         beta = next_alpha
                         pos = (x, y)
                     if beta < alpha:  # alpha, beta pruning
@@ -285,12 +297,23 @@ class Gobang:
                 score += self.getScore(gamePlayer, (board[(x, y)], board[(x, y + 1)],
                                                     board[(x, y + 2)], board[(x, y + 3)], board[(x, y + 4)],
                                                     board[(x, y + 5)]))
+                if y + 6 < self.size:
+                    score += self.getScore(gamePlayer, (board[(x, y)], board[(x, y + 1)],
+                                                        board[(x, y + 2)], board[(x, y + 3)], board[(x, y + 4)],
+                                                        board[(x, y + 5)], board[(x, y + 6)]))
         # vertical
         for x in range(self.size - 5):
             for y in range(self.size):
                 score += self.getScore(gamePlayer, (board[(x, y)], board[(x + 1, y)],
                                                     board[(x + 2, y)], board[(x + 3, y)], board[(x + 4, y)],
                                                     board[(x + 5, y)]))
+                if x + 6 < self.size:
+                    score += self.getScore(gamePlayer, (board[(x, y)], board[(x + 1, y)],
+                                                        board[(x + 2, y)], board[(x + 3, y)], board[(x + 4, y)],
+                                                        board[(x + 5, y)], board[(x + 6, y)]))
+
+
+
         # diagonal line, from top left to bottom right
         for x in range(self.size - 5):
             for y in range(self.size - 5):
@@ -317,7 +340,8 @@ class Gobang:
                 color, color, color, color, color, 255 - color) or \
                 chess == (255 - color, color, color, color, color, color) or chess == (
                 -1, color, color, color, color, color) or \
-                chess == (color, color, color, color, color, -1):
+                chess == (color, color, color, color, color, -1) or \
+                chess == (-1, color, color, color, color, color, -1):
             return 1000
 
         # second priority, to prevent the opponent from winning in the next step
@@ -334,29 +358,29 @@ class Gobang:
                 color, 255 - color, 255 - color, 255 - color, color, 255 - color) or \
                 chess == (-1, 255 - color, color, 255 - color, 255 - color, 255 - color) or chess == (
                 255 - color, 255 - color, 255 - color, color, 255 - color, -1):
-            return 80
+            return 500
 
         # third priority, create a must winning strategy
         if chess == (-1, color, color, color, color, -1):
-            return 70
+            return 400
 
         # fifth priority, disrupt the opponent's must winning strategy
         if chess == (-1, color, color - 255, color - 255, color - 255, -1) or chess == (
                 -1, color - 255, color - 255, color - 255, color, -1) \
                 or chess == (-1, color - 255, color - 255, color, color - 255, -1) or chess == (
                 -1, color - 255, color, color - 255, color - 255, -1):
-            return 40
+            return 60
         if chess == (-1, color - 255, color - 255, -1, color - 255, color) or chess == (
                 color, color - 255, -1, color - 255, color - 255, -1) or \
                 chess == (-1, color - 255, -1, color - 255, color - 255, color) or chess == (
                 color, color - 255, color - 255, -1, color - 255, -1):
             # return 2000
-            return 40
+            return 60
 
         # sixth priority, create favorable chess
         if chess == (-1, color, color, color, -1, -1) or chess == (-1, -1, color, color, color, -1) or \
                 chess == (-1, color, color, -1, color, -1) or chess == (-1, color, -1, color, color, -1):
-            return 20
+            return 50
         if chess == (-1, color, color, -1, -1, -1) or chess == (-1, -1, -1, color, color, -1) or \
                 chess == (-1, -1, color, color, -1, -1) or \
                 chess == (-1, color, -1, color, -1, -1) or chess == (-1, -1, color, -1, color, -1):
@@ -415,4 +439,4 @@ class Gobang:
                     if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
                         pygame.quit()
                         exit()
-                self.renderBoard({"winner": msg, "winPos": winPos})
+                self.renderBoard(someoneWon = {"winner": msg, "winPos": winPos}, lastPiece=(winPos[1]))
