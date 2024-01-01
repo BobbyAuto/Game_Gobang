@@ -6,6 +6,12 @@
   <li>Python</li>
 </ul>
 
+### Libs Used under Python for This Project
+<ul>
+  <li>numpy</li>
+  <li>pygame</li>
+</ul>
+
 ### What is this game?
 Gobang,  also called Gomoku or Five in a Row, which is known in several countries under different names, is one of the most popular chess games in the world [7]. Players alternate turns placing a piece of their color on an empty intersection. The winner is the first player to form an unbroken line of five pieces of their color horizontally, vertically, or diagonally. Despite the rules of the Gobang game being simple, its playing tactic is complex. Players must be careful in placing chess pieces step by step, which is a challenging task for the thinking ability of players. Therefore, it is an interesting project topic for this study to develop an intelligent AI Gobang player with computer programming. In this project, we will implement the Minimax [8] and Alpha-Beta pruning [9] algorithms to empower AI to take the best payoff movement and in the meanwhile minimize the benefits of the opponent, achieving gameplay between human players and AI.
 
